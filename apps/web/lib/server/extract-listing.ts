@@ -4,7 +4,9 @@ type ExtractedListing = {
   name?: string;
   area?: string;
   weeklyRent?: number;
+  deposit?: number;
   bills?: "included" | "excluded" | "partial";
+  internet?: "included" | "available" | "unavailable";
   roomType?: string;
   contractWeeks?: number;
   images?: string[];
@@ -74,9 +76,11 @@ export function extractListing(html: string, sourceUrl?: string): ExtractedListi
   const priceSpecification = object(offers?.priceSpecification);
   const price = priceSpecification?.price ?? offers?.price;
   const pricePeriod = String(priceSpecification?.unitText ?? offers?.unitText ?? "").toLowerCase();
-  const structuredRent = pricePeriod.includes("week") && (typeof price === "number" || typeof price === "string")
-    ? Number(price)
-    : undefined;
+  const priceCurrency = String(priceSpecification?.priceCurrency ?? offers?.priceCurrency ?? "").toUpperCase();
+  const parsedStructuredRent = typeof price === "number" || typeof price === "string" ? Number(price) : NaN;
+  const structuredRent = pricePeriod.includes("week") && (!priceCurrency || priceCurrency === "GBP") &&
+    Number.isFinite(parsedStructuredRent) && parsedStructuredRent >= 20 && parsedStructuredRent <= 5_000
+    ? parsedStructuredRent : undefined;
   const descriptionText = [description, typeof listing?.description === "string" ? listing.description : ""].join(" ");
   const contractMatch = descriptionText.match(/\b(\d{2})[- ]week(?:s)?\s+contract\b|\bcontract\s+(?:length\s*)?[:\-]?\s*(\d{2})\s+weeks\b/i);
   const contractWeeks = contractMatch ? Number(contractMatch[1] ?? contractMatch[2]) : undefined;
@@ -86,6 +90,16 @@ export function extractListing(html: string, sourceUrl?: string): ExtractedListi
   const bills = /\b(?:bills|utilities)\s+(?:not\s+included|excluded)\b/i.test(descriptionText)
     ? "excluded"
     : /\b(?:all\s+)?(?:bills|utilities)\s+included\b/i.test(descriptionText) ? "included" : undefined;
+  const depositMatches = [
+    ...descriptionText.matchAll(/(?<!holding\s)\b(?:tenancy\s+)?deposit\s*(?:of|:)\s*£\s*(\d{2,5}(?:\.\d{1,2})?)\b/gi),
+    ...descriptionText.matchAll(/£\s*(\d{2,5}(?:\.\d{1,2})?)\s+(?:tenancy\s+)?deposit\b/gi),
+  ].map((match) => Number(match[1]));
+  const deposits = [...new Set(depositMatches)];
+  const deposit = deposits.length === 1 ? deposits[0] : undefined;
+  const internet = /\b(?:wi-?fi|internet)\s+included\b/i.test(descriptionText)
+    ? "included"
+    : /\b(?:wi-?fi|internet)\s+available\s+(?:for|at)\s+(?:an?\s+)?(?:extra|additional)\s+(?:cost|fee)\b/i.test(descriptionText)
+      ? "available" : undefined;
 
   $("script, style, nav, header, footer").remove();
   const pageText = $("main, article, [role='main']").first().text() || $("body").text();
@@ -100,6 +114,8 @@ export function extractListing(html: string, sourceUrl?: string): ExtractedListi
     area: typeof locality === "string" ? locality.slice(0, 100) : undefined,
     weeklyRent: isStartingPrice ? undefined : candidateRent,
     bills,
+    deposit,
+    internet,
     roomType,
     contractWeeks,
     images: [...new Set(images)].slice(0, 8),

@@ -17,6 +17,10 @@ Open a draft and choose **Edit comparison** to correct its details or retry extr
 
 Drafts can include up to eight listing photos per place. You can remove extracted photos or add photo links manually. A draft also calculates rent across the full contract where both weekly rent and contract length are known. You can save a private choice and an optional reason, then update or clear it later.
 
+The saved comparison page has a cost planner for optional weekly bills estimates. It calculates rent plus entered bills for each contract and shows deposits separately. The estimates are temporary and are not saved with the draft.
+
+You can also add a shared journey destination and a travel time and mode for each place. The summary compares times when both places use the same travel mode.
+
 `npm run typecheck` validates TypeScript and `npm run build` builds the production application. The workspace shares public comparison types and design tokens between packages.
 
 ## Private groups

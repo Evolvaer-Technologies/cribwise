@@ -19,7 +19,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <button type="button" className="gallery-open" aria-label={`Open larger view of ${photo.caption ?? photo.alt}`} onClick={() => dialog.current?.showModal()}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photo.url} alt={photo.alt} />
+          <img src={photo.url} alt={photo.alt} referrerPolicy="no-referrer" />
         </button>
         <figcaption>{photo.caption ?? "Accommodation photo"} · {selected + 1} of {photos.length}</figcaption>
       </figure>
@@ -28,7 +28,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
           {photos.map((item, index) => (
             <button type="button" key={item.url} aria-label={`Show photo ${index + 1}: ${item.caption ?? item.alt}`} aria-pressed={index === selected} onClick={() => setSelected(index)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.url} alt="" />
+              <img src={item.url} alt="" loading="lazy" referrerPolicy="no-referrer" />
             </button>
           ))}
         </div>
@@ -42,7 +42,7 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
           <button type="button" onClick={() => dialog.current?.close()} aria-label="Close photo gallery">Close</button>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={photo.url} alt={photo.alt} />
+        <img src={photo.url} alt={photo.alt} referrerPolicy="no-referrer" />
         {photos.length > 1 && (
           <div className="gallery-dialog-controls">
             <button type="button" onClick={() => setSelected((current) => (current - 1 + photos.length) % photos.length)}>Previous photo</button>
