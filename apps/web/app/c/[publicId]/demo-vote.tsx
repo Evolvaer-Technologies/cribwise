@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { illustrativeCounts } from "../../../lib/sample-poll";
 
 const reasons = [
   ["PRICE", "Price"],
@@ -22,7 +23,13 @@ export function DemoVote({ publicId }: { publicId: string }) {
   const [reason, setReason] = useState("");
   const [comment, setComment] = useState("");
   const [vote, setVote] = useState<Vote | null>(null);
+  const [editing, setEditing] = useState(false);
   const [ready, setReady] = useState(false);
+  const [sampleA, sampleB] = illustrativeCounts(publicId);
+  const countA = sampleA + (vote?.side === "A" ? 1 : 0);
+  const countB = sampleB + (vote?.side === "B" ? 1 : 0);
+  const total = countA + countB;
+  const percentA = Math.round((countA / total) * 100);
 
   useEffect(() => {
     try {
@@ -43,9 +50,10 @@ export function DemoVote({ publicId }: { publicId: string }) {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!side || !reasons.some(([value]) => value === reason) || vote) return;
+    if (!side || !reasons.some(([value]) => value === reason)) return;
     const choice = { side, reason, comment: comment.trim().slice(0, 500) };
     setVote(choice);
+    setEditing(false);
     try {
       localStorage.setItem(storageKey, JSON.stringify(choice));
     } catch {
@@ -57,7 +65,7 @@ export function DemoVote({ publicId }: { publicId: string }) {
     <section className="vote-panel" aria-labelledby="vote-title">
       <p className="eyebrow">Your perspective</p>
       <h2 id="vote-title">Which place would you choose?</h2>
-      {ready && vote ? (
+      {ready && vote && !editing ? (
         <>
           <div className="vote-confirmation" role="status">
             <strong>You chose Option {vote.side}</strong>
@@ -65,19 +73,12 @@ export function DemoVote({ publicId }: { publicId: string }) {
             {vote.comment && <blockquote className="vote-comment">{vote.comment}</blockquote>}
             <small>Saved on this device for this sample comparison.</small>
           </div>
-          <div className="poll-results" aria-label="Poll results">
-            <h3>Poll results</h3>
-            <p>1 local vote. Percentages reflect only your choice on this device.</p>
-            {(["A", "B"] as const).map((option) => {
-              const percentage = vote.side === option ? 100 : 0;
-              return (
-                <div className="result-row" key={option}>
-                  <div className="result-label"><span>Option {option}</span><strong>{percentage}%</strong></div>
-                  <div className="result-track" role="meter" aria-label={`Option ${option}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percentage}><span style={{ width: `${percentage}%` }} /></div>
-                </div>
-              );
-            })}
-          </div>
+          <button className="vote-edit" type="button" onClick={() => {
+            setSide(vote.side);
+            setReason(vote.reason);
+            setComment(vote.comment ?? "");
+            setEditing(true);
+          }}>Change my choice or comment</button>
         </>
       ) : (
         <form onSubmit={submit}>
@@ -99,10 +100,27 @@ export function DemoVote({ publicId }: { publicId: string }) {
             <textarea value={comment} onChange={(event) => setComment(event.target.value)} maxLength={500} rows={4} placeholder="What stood out to you about this option?" />
             <span className="character-count">{comment.length}/500 characters</span>
           </label>
-          <button className="button" type="submit" disabled={!ready}>Record my choice</button>
+          <div className="vote-form-actions">
+            <button className="button" type="submit" disabled={!ready}>{editing ? "Update my choice" : "Record my choice"}</button>
+            {editing && <button type="button" onClick={() => setEditing(false)}>Cancel</button>}
+          </div>
           <p className="vote-note">Sample interaction. Choices are stored in this browser.</p>
         </form>
       )}
+      {ready && <div className="poll-results" aria-label="Illustrative poll results">
+        <h3>Illustrative poll results</h3>
+        <p>{sampleA + sampleB} fictional sample votes{vote ? " plus your choice saved in this browser" : ""}. These are demonstration figures, not community results.</p>
+        {(["A", "B"] as const).map((option) => {
+          const percentage = option === "A" ? percentA : 100 - percentA;
+          const count = option === "A" ? countA : countB;
+          return (
+            <div className="result-row" key={option}>
+              <div className="result-label"><span>Option {option} · {count} votes</span><strong>{percentage}%</strong></div>
+              <div className="result-track" role="meter" aria-label={`Option ${option}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percentage}><span style={{ width: `${percentage}%` }} /></div>
+            </div>
+          );
+        })}
+      </div>}
     </section>
   );
 }

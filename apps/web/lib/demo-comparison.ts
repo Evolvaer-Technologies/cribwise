@@ -89,6 +89,18 @@ const exampleNames = [
   ["Willow Court", "Parkside Rooms"],
 ] as const;
 
+const samplePhotos = [
+  { url: "/demo/ensuite-v2.png", alt: "Illustrative student en-suite room" },
+  { url: "/demo/studio-v2.png", alt: "Illustrative private student studio" },
+  { url: "/demo/bedroom.png", alt: "Illustrative student bedroom" },
+  { url: "/demo/kitchen.png", alt: "Illustrative shared kitchen" },
+] as const;
+
+function sampleGallery(seed: number) {
+  return [samplePhotos[seed % samplePhotos.length], samplePhotos[(seed + 2) % samplePhotos.length]]
+    .map((photo) => ({ ...photo, caption: "Illustrative sample image" }));
+}
+
 const areaSamples: PublicComparison[] = areas.flatMap((area, areaIndex) =>
   Array.from({ length: 15 }, (_, index) => {
     const names = exampleNames[index % exampleNames.length];
@@ -104,6 +116,7 @@ const areaSamples: PublicComparison[] = areas.flatMap((area, areaIndex) =>
           bills: index % 2 === 0 ? "included" as const : "excluded" as const,
           roomType: index % 3 === 0 ? "Studio" : "En-suite room",
           contractWeeks: 44,
+          gallery: sampleGallery(areaIndex + index),
         },
         {
           side: "B" as const,
@@ -113,10 +126,20 @@ const areaSamples: PublicComparison[] = areas.flatMap((area, areaIndex) =>
           bills: index % 2 === 0 ? "excluded" as const : "included" as const,
           roomType: index % 3 === 0 ? "Private room" : "Studio",
           contractWeeks: 48,
+          gallery: sampleGallery(areaIndex + index + 1),
         },
       ],
     };
   }),
 );
 
-export const sampleComparisons: PublicComparison[] = [...originalSamples, ...areaSamples];
+export const sampleComparisons: PublicComparison[] = [
+  ...originalSamples.map((comparison, index) => ({
+    ...comparison,
+    options: comparison.options.map((option, side) => ({
+      ...option,
+      gallery: option.gallery?.length ? option.gallery : sampleGallery(index + side),
+    })) as PublicComparison["options"],
+  })),
+  ...areaSamples,
+];
