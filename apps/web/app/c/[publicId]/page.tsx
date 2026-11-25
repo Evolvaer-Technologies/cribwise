@@ -3,13 +3,14 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { PublicComparison, PublicOption } from "@evolvaer/contracts";
 import { sampleComparisons } from "../../../lib/demo-comparison";
+import { getPublicComparison } from "../../../lib/public-comparisons";
 import { PhotoGallery } from "./photo-gallery";
 import { DemoVote } from "./demo-vote";
 import { ShareComparison } from "./share-comparison";
 
 export async function generateMetadata({ params }: { params: Promise<{ publicId: string }> }): Promise<Metadata> {
   const { publicId } = await params;
-  const comparison = sampleComparisons.find((item) => item.publicId === publicId);
+  const comparison = getPublicComparison(publicId);
   if (!comparison) return { title: "Comparison unavailable", robots: { index: false, follow: false } };
 
   const description = `Fictional sample: ${comparison.options[0].displayName} and ${comparison.options[1].displayName} on Cribwise.`;
@@ -86,7 +87,7 @@ function OptionCard({ option }: { option: PublicOption }) {
 
 export default async function ComparisonPage({ params }: { params: Promise<{ publicId: string }> }) {
   const { publicId } = await params;
-  const comparison = sampleComparisons.find((item) => item.publicId === publicId);
+  const comparison = getPublicComparison(publicId);
   if (!comparison) notFound();
 
   return (
