@@ -1,0 +1,12 @@
+{
+  "name": "cribwise",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "npm run dev -w @evolvaer/web",
+    "build": "npm run build -w @evolvaer/web",
+    "start": "npm run start -w @evolvaer/web",
+    "typecheck": "npm run typecheck -w @evolvaer/web"
+  }
+}

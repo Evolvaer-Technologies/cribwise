@@ -1,0 +1,33 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { ThemeSwitch } from "./theme-switch";
+import "@evolvaer/design-tokens";
+import "./styles.css";
+
+export const metadata: Metadata = {
+  title: { default: "Cribwise", template: "%s | Cribwise" },
+  description: "Compare student homes side by side.",
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en-GB" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem("evolvaer-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}` }} />
+      </head>
+      <body>
+        <a className="skip" href="#main">Skip to content</a>
+        <header className="shell masthead">
+          <Link className="wordmark" href="/">Cribwise</Link>
+          <nav aria-label="Main navigation">
+            <Link href="/how-it-works">How it works</Link>
+          </nav>
+          <ThemeSwitch />
+        </header>
+        <main className="shell" id="main" tabIndex={-1}>{children}</main>
+        <footer className="shell footer">Cribwise by Evolvaer</footer>
+      </body>
+    </html>
+  );
+}
