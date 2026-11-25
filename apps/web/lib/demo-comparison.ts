@@ -1,4 +1,5 @@
 import type { PublicComparison } from "@evolvaer/contracts";
+import { areas } from "./areas";
 
 export const demoComparison: PublicComparison = {
   publicId: "demo",
@@ -12,6 +13,10 @@ export const demoComparison: PublicComparison = {
       bills: "included",
       roomType: "En-suite room",
       contractWeeks: 44,
+      gallery: [
+        { url: "/demo/bedroom.png", alt: "Illustrative student bedroom with desk and window", caption: "Illustrative bedroom" },
+        { url: "/demo/kitchen.png", alt: "Illustrative shared kitchen and dining area", caption: "Illustrative kitchen" },
+      ],
     },
     {
       side: "B",
@@ -24,7 +29,7 @@ export const demoComparison: PublicComparison = {
   ],
 };
 
-export const sampleComparisons: PublicComparison[] = [
+const originalSamples: PublicComparison[] = [
   demoComparison,
   {
     publicId: "city-or-campus",
@@ -42,4 +47,76 @@ export const sampleComparisons: PublicComparison[] = [
       { side: "B", displayName: "Quay Studios", area: "Salford, Greater Manchester", rent: { amount: 205, currency: "GBP", period: "week" }, roomType: "Studio" },
     ],
   },
+  {
+    publicId: "close-or-spacious",
+    title: "Closer to campus or more space?",
+    options: [
+      { side: "A", displayName: "Elm Place", area: "Oxford Road, Manchester", rent: { amount: 185, currency: "GBP", period: "week" }, bills: "included", roomType: "En-suite room", contractWeeks: 44 },
+      { side: "B", displayName: "Brook House", area: "Withington, Manchester", rent: { amount: 150, currency: "GBP", period: "week" }, roomType: "Large private room", contractWeeks: 48 },
+    ],
+  },
+  {
+    publicId: "bills-or-budget",
+    title: "Bills included or lower rent?",
+    options: [
+      { side: "A", displayName: "Maple Court", area: "Hulme, Manchester", rent: { amount: 178, currency: "GBP", period: "week" }, bills: "included", roomType: "En-suite room", contractWeeks: 44 },
+      { side: "B", displayName: "Park Lane Rooms", area: "Moss Side, Manchester", rent: { amount: 142, currency: "GBP", period: "week" }, bills: "excluded", roomType: "Private room", contractWeeks: 48 },
+    ],
+  },
+  {
+    publicId: "short-or-long",
+    title: "A shorter contract or a lower price?",
+    options: [
+      { side: "A", displayName: "Harbour Studios", area: "Salford Quays", rent: { amount: 198, currency: "GBP", period: "week" }, bills: "included", roomType: "Studio", contractWeeks: 40 },
+      { side: "B", displayName: "Cedar Rooms", area: "Ordsall, Salford", rent: { amount: 165, currency: "GBP", period: "week" }, roomType: "En-suite room", contractWeeks: 51 },
+    ],
+  },
+  {
+    publicId: "private-or-shared",
+    title: "Private bathroom or shared facilities?",
+    options: [
+      { side: "A", displayName: "Station House", area: "Manchester city centre", rent: { amount: 210, currency: "GBP", period: "week" }, bills: "included", roomType: "En-suite room", contractWeeks: 44 },
+      { side: "B", displayName: "Garden Flats", area: "Rusholme, Manchester", rent: { amount: 138, currency: "GBP", period: "week" }, roomType: "Private room, shared bathroom", contractWeeks: 44 },
+    ],
+  },
 ];
+
+const exampleNames = [
+  ["Oak House", "River Court"],
+  ["Maple Rooms", "Station Studios"],
+  ["The Lantern", "Garden Place"],
+  ["Cedar House", "Bridge Apartments"],
+  ["Willow Court", "Parkside Rooms"],
+] as const;
+
+const areaSamples: PublicComparison[] = areas.flatMap((area, areaIndex) =>
+  Array.from({ length: 15 }, (_, index) => {
+    const names = exampleNames[index % exampleNames.length];
+    return {
+      publicId: `sample-${areaIndex + 1}-${index + 1}`,
+      title: `${names[0]} or ${names[1]} in ${area}?`,
+      options: [
+        {
+          side: "A" as const,
+          displayName: `${names[0]} ${index + 1}`,
+          area,
+          rent: { amount: 140 + ((areaIndex * 7 + index * 11) % 75), currency: "GBP", period: "week" as const },
+          bills: index % 2 === 0 ? "included" as const : "excluded" as const,
+          roomType: index % 3 === 0 ? "Studio" : "En-suite room",
+          contractWeeks: 44,
+        },
+        {
+          side: "B" as const,
+          displayName: `${names[1]} ${index + 1}`,
+          area,
+          rent: { amount: 145 + ((areaIndex * 13 + index * 9) % 70), currency: "GBP", period: "week" as const },
+          bills: index % 2 === 0 ? "excluded" as const : "included" as const,
+          roomType: index % 3 === 0 ? "Private room" : "Studio",
+          contractWeeks: 48,
+        },
+      ],
+    };
+  }),
+);
+
+export const sampleComparisons: PublicComparison[] = [...originalSamples, ...areaSamples];

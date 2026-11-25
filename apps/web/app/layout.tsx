@@ -22,6 +22,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Link className="wordmark" href="/">Cribwise</Link>
           <nav aria-label="Main navigation">
             <Link href="/how-it-works">How it works</Link>
+            <Link href="/register">My areas</Link>
           </nav>
           <ThemeSwitch />
         </header>

@@ -8,6 +8,7 @@ export type PublicOption = {
   contractWeeks?: number;
   sourceUrl?: string;
   heroImage?: { url: string; alt: string };
+  gallery?: Array<{ url: string; alt: string; caption?: string }>;
 };
 
 export type PublicComparison = {
