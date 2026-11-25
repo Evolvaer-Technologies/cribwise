@@ -9,7 +9,8 @@ export default function Home() {
         <h1>Choose your next home with more confidence.</h1>
         <p>Explore side by side comparisons of rent, bills, room type and contract details.</p>
         <div className="actions">
-          <a className="button" href="#comparisons">Explore comparisons</a>
+          <Link className="button" href="/create">Compare two places</Link>
+          <a href="#comparisons">Explore examples</a>
           <Link href="/how-it-works">See how it works</Link>
         </div>
       </section>

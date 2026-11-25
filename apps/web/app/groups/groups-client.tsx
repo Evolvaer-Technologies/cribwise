@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase-browser";
 
 type Group = { id: string; name: string; owner_id: string };
+type GroupMember = { user_id: string; role: "owner" | "member"; joined_at: string };
 type GroupComparison = {
   id: string;
   title: string;
@@ -17,6 +18,7 @@ export function GroupsClient() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [selected, setSelected] = useState<Group | null>(null);
   const [comparisons, setComparisons] = useState<GroupComparison[]>([]);
+  const [members, setMembers] = useState<GroupMember[]>([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [groupName, setGroupName] = useState("");
@@ -28,6 +30,7 @@ export function GroupsClient() {
   const [inviteLink, setInviteLink] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const acceptedInvite = useRef<string | null>(null);
 
   useEffect(() => {
     if (!supabase) return;
@@ -55,6 +58,7 @@ export function GroupsClient() {
   useEffect(() => {
     if (!supabase || !selected) {
       setComparisons([]);
+      setMembers([]);
       return;
     }
     supabase.from("cribwise_group_comparisons")
@@ -65,13 +69,22 @@ export function GroupsClient() {
         if (error) setMessage(error.message);
         else setComparisons((data ?? []) as GroupComparison[]);
       });
+    supabase.from("cribwise_group_members")
+      .select("user_id,role,joined_at")
+      .eq("group_id", selected.id)
+      .order("joined_at", { ascending: true })
+      .then(({ data, error }) => {
+        if (error) setMessage(error.message);
+        else setMembers((data ?? []) as GroupMember[]);
+      });
   }, [selected]);
 
   useEffect(() => {
     const client = supabase;
     if (!client || !user) return;
     const token = new URLSearchParams(window.location.search).get("invite");
-    if (!token) return;
+    if (!token || acceptedInvite.current === token) return;
+    acceptedInvite.current = token;
     client.rpc("accept_cribwise_group_invite", { p_token: token }).then(({ data, error }) => {
       if (error) setMessage(error.message);
       else {
@@ -86,6 +99,10 @@ export function GroupsClient() {
 
   async function authenticate(mode: "signIn" | "signUp") {
     if (!supabase || busy) return;
+    if (mode === "signUp" && password.length < 8) {
+      setMessage("Use at least eight characters for a new password.");
+      return;
+    }
     setBusy(true);
     setMessage("");
     const result = mode === "signUp"
@@ -146,6 +163,19 @@ export function GroupsClient() {
     setMessage("Comparison added to this group.");
   }
 
+  async function removeMember(member: GroupMember) {
+    if (!supabase || !selected || member.role !== "member" || busy) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("remove_cribwise_group_member", {
+      p_group_id: selected.id,
+      p_user_id: member.user_id,
+    });
+    setBusy(false);
+    if (error) return setMessage(error.message);
+    setMembers((current) => current.filter((item) => item.user_id !== member.user_id));
+    setMessage("Member removed. Their access to this group's comparisons has ended.");
+  }
+
   if (!supabase) {
     return (
       <section className="content groups-page">
@@ -162,13 +192,17 @@ export function GroupsClient() {
       <p>Create a group and share comparisons with invited members.</p>
       {message && <p className="group-message" role="status">{message}</p>}
       {!user ? (
-        <form className="group-form" onSubmit={(event) => { event.preventDefault(); authenticate("signIn"); }}>
+        <form className="group-form" onSubmit={(event) => {
+          event.preventDefault();
+          const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+          authenticate(submitter?.value === "signUp" ? "signUp" : "signIn");
+        }}>
           <h2>Sign in or create an account</h2>
           <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" /></label>
-          <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} autoComplete="current-password" /></label>
+          <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" /></label>
           <div className="group-actions">
-            <button className="button" disabled={busy} type="submit">Sign in</button>
-            <button type="button" disabled={busy} onClick={() => authenticate("signUp")}>Create account</button>
+            <button className="button" disabled={busy} type="submit" name="authMode" value="signIn">Sign in</button>
+            <button disabled={busy} type="submit" name="authMode" value="signUp">Create account</button>
           </div>
         </form>
       ) : (
@@ -197,6 +231,19 @@ export function GroupsClient() {
                     {inviteLink && <input aria-label="Invite link" readOnly value={inviteLink} onFocus={(event) => event.target.select()} />}
                   </div>
                 )}
+                <section className="group-members" aria-label="Group members">
+                  <h3>Members ({members.length})</h3>
+                  <ul>
+                    {members.map((member) => (
+                      <li key={member.user_id}>
+                        <span>{member.user_id === user.id ? "You" : `Member ${member.user_id.slice(0, 8)}`} · {member.role}</span>
+                        {selected.owner_id === user.id && member.role === "member" && (
+                          <button type="button" disabled={busy} onClick={() => removeMember(member)}>Remove</button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
                 <form className="group-form" onSubmit={createComparison}>
                   <h3>Add a comparison</h3>
                   <label>Question<input value={title} onChange={(event) => setTitle(event.target.value)} minLength={4} maxLength={160} required placeholder="Which place would you choose?" /></label>

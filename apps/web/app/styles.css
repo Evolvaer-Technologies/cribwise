@@ -87,6 +87,9 @@ p { max-width: 62ch; color: var(--secondary); margin-block: .75rem; }
 .group-comparisons { display: grid; gap: .6rem; }
 .group-comparisons li { display: grid; gap: .2rem; padding: .8rem; border: 1px solid var(--border); border-radius: 8px; }
 .group-comparisons span { color: var(--secondary); font-size: .85rem; }
+.group-members ul { display: grid; gap: .5rem; margin-top: .5rem; }
+.group-members li { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .6rem .75rem; border: 1px solid var(--border); border-radius: 8px; font-size: .85rem; }
+.group-members button { min-height: 44px; padding: .3rem .7rem; color: var(--brand); }
 .comparison-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin-top: 2rem; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--border); }
 .comparison-summary div { display: grid; gap: .25rem; padding: 1rem; background: var(--surface); }
 .comparison-summary span { color: var(--secondary); font-size: .8rem; }
@@ -176,6 +179,14 @@ dd { font-weight: 650; overflow-wrap: anywhere; }
 .steps li { margin-block: .75rem; }
 .preferences { max-width: 48rem; }
 .preference-note { padding: .75rem 1rem; background: var(--subtle); border-radius: 8px; font-size: .875rem; }
+.create-page { max-width: 64rem; }
+.create-form { display: grid; gap: 1.5rem; margin-top: 1.5rem; }
+.create-form > .button { justify-self: start; }
+.create-form label { display: grid; gap: .35rem; font-size: .875rem; font-weight: 650; }
+.create-form input, .create-form select { width: 100%; min-height: 44px; padding: .55rem .7rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-weight: 400; }
+.create-options { display: grid; gap: 1rem; }
+.create-option { display: grid; gap: .8rem; padding: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.create-option legend { padding: 0 .4rem; color: var(--brand); font-weight: 750; }
 .preferences fieldset { margin-top: 2rem; }
 .preferences legend { font-weight: 750; }
 .preferences legend span { color: var(--secondary); font-size: .85rem; font-weight: 400; margin-left: .5rem; }
@@ -197,6 +208,7 @@ dd { font-weight: 650; overflow-wrap: anywhere; }
 @media (min-width: 700px) {
   .group-grid { grid-template-columns: 15rem minmax(0, 1fr); }
   .group-option-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .create-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 480px) {
   .comparison-summary { grid-template-columns: 1fr; }

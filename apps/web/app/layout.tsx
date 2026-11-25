@@ -21,6 +21,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/how-it-works">How it works</Link>
             <Link href="/register">My areas</Link>
             <Link href="/saved">Saved</Link>
+            <Link href="/my-comparisons">My comparisons</Link>
             <Link href="/groups">Groups</Link>
           </nav>
           <ThemeSwitch />

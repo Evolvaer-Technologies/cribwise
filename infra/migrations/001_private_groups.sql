@@ -173,7 +173,28 @@ begin
 end;
 $$;
 
+create function public.remove_cribwise_group_member(p_group_id uuid, p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not exists (
+    select 1 from public.cribwise_groups
+    where id = p_group_id and owner_id = (select auth.uid())
+  ) then
+    raise exception 'Only the group owner can remove members';
+  end if;
+
+  delete from public.cribwise_group_members
+  where group_id = p_group_id and user_id = p_user_id and role = 'member';
+end;
+$$;
+
 revoke all on function public.create_cribwise_group_invite(uuid) from public, anon;
 revoke all on function public.accept_cribwise_group_invite(uuid) from public, anon;
+revoke all on function public.remove_cribwise_group_member(uuid, uuid) from public, anon;
 grant execute on function public.create_cribwise_group_invite(uuid) to authenticated;
 grant execute on function public.accept_cribwise_group_invite(uuid) to authenticated;
+grant execute on function public.remove_cribwise_group_member(uuid, uuid) to authenticated;
