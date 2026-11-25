@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
   try {
     const { html, sourceUrl } = await fetchListingHtml(input.url);
-    const fields = extractListing(html);
+    const fields = extractListing(html, sourceUrl);
     return Response.json({ sourceUrl, fields }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     return Response.json({

@@ -15,6 +15,8 @@ Use `/create` to enter two places and `/my-comparisons` to reopen drafts. On the
 
 Open a draft and choose **Edit comparison** to correct its details or retry extraction from a listing link. Saving updates that draft in place.
 
+Drafts can include up to eight listing photos per place. You can remove extracted photos or add photo links manually. A draft also calculates rent across the full contract where both weekly rent and contract length are known. You can save a private choice and an optional reason, then update or clear it later.
+
 `npm run typecheck` validates TypeScript and `npm run build` builds the production application. The workspace shares public comparison types and design tokens between packages.
 
 ## Private groups

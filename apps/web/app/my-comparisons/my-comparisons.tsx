@@ -25,6 +25,7 @@ export function MyComparisons() {
           <li key={comparison.id}>
             <Link href={`/my-comparisons/${comparison.id}`}>{comparison.title}</Link>
             <span>{comparison.options[0].name} vs {comparison.options[1].name}</span>
+            {comparison.decision && <span>Chosen: Option {comparison.decision.side} · {comparison.options[comparison.decision.side === "A" ? 0 : 1].name}</span>}
           </li>
         ))}
       </ul>

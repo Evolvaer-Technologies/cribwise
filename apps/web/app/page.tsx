@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ComparisonBrowse } from "./comparison-browse";
+import { HomeLocalComparisons } from "./home-local-comparisons";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
           <Link href="/how-it-works">See how it works</Link>
         </div>
       </section>
+      <HomeLocalComparisons />
       <ComparisonBrowse />
     </>
   );

@@ -6,6 +6,7 @@ export type LocalOption = {
   roomType: string;
   contractWeeks: number | null;
   sourceUrl?: string;
+  images?: string[];
 };
 
 export type LocalComparison = {
@@ -13,6 +14,7 @@ export type LocalComparison = {
   title: string;
   createdAt: string;
   options: [LocalOption, LocalOption];
+  decision?: { side: "A" | "B"; note: string; savedAt: string };
 };
 
 const storageKey = "cribwise-local-comparisons";
@@ -38,6 +40,8 @@ function normalizeOption(value: unknown): LocalOption | null {
       value.contractWeeks > 0 && value.contractWeeks <= 104 ? value.contractWeeks : null,
     sourceUrl: typeof value.sourceUrl === "string" && /^https?:\/\//i.test(value.sourceUrl)
       ? value.sourceUrl : undefined,
+    images: Array.isArray(value.images) ? value.images.filter((image): image is string =>
+      typeof image === "string" && image.length <= 2_000 && /^https?:\/\//i.test(image)).slice(0, 8) : [],
   };
 }
 
@@ -52,7 +56,12 @@ export function readLocalComparisons(): LocalComparison[] {
       }
       const a = normalizeOption(item.options[0]);
       const b = normalizeOption(item.options[1]);
-      return a && b ? [{ id: item.id, title: item.title, createdAt: item.createdAt, options: [a, b] }] : [];
+      const rawDecision = isRecord(item.decision) ? item.decision : null;
+      const decision: LocalComparison["decision"] = rawDecision && (rawDecision.side === "A" || rawDecision.side === "B") &&
+        typeof rawDecision.note === "string" && typeof rawDecision.savedAt === "string"
+        ? { side: rawDecision.side as "A" | "B", note: rawDecision.note.slice(0, 1_000), savedAt: rawDecision.savedAt }
+        : undefined;
+      return a && b ? [{ id: item.id, title: item.title, createdAt: item.createdAt, options: [a, b], decision }] : [];
     });
   } catch {
     return [];

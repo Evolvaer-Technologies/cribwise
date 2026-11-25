@@ -7,6 +7,7 @@ type ExtractedListing = {
   bills?: "included" | "excluded" | "partial";
   roomType?: string;
   contractWeeks?: number;
+  images?: string[];
 };
 
 function object(value: unknown): Record<string, unknown> | null {
@@ -31,7 +32,7 @@ function weeklyPrice(text: string): number | undefined {
   return unique.length === 1 ? unique[0] : undefined;
 }
 
-export function extractListing(html: string): ExtractedListing {
+export function extractListing(html: string, sourceUrl?: string): ExtractedListing {
   const $ = load(html);
   const metadataTitle = $('meta[property="og:title"]').attr("content")?.trim();
   const heading = $("h1").first().text().trim();
@@ -50,6 +51,23 @@ export function extractListing(html: string): ExtractedListing {
   const listing = structured.find((item) =>
     ["Apartment", "Accommodation", "LodgingBusiness", "Residence", "Product"].includes(String(item["@type"]))) ??
     structured.find((item) => object(item.address) || item.offers);
+  const imageCandidates: unknown[] = [
+    ...$('meta[property="og:image"], meta[name="twitter:image"]').map((_index, element) => $(element).attr("content")).get(),
+    listing?.image,
+  ];
+  const images = imageCandidates.flatMap((candidate): string[] => {
+    const entries = Array.isArray(candidate) ? candidate : [candidate];
+    return entries.flatMap((entry) => {
+      const value = typeof entry === "string" ? entry : object(entry)?.url;
+      if (typeof value !== "string" || value.length > 2_000) return [];
+      try {
+        const url = new URL(value, sourceUrl);
+        return ["http:", "https:"].includes(url.protocol) ? [url.href] : [];
+      } catch {
+        return [];
+      }
+    });
+  });
   const address = object(listing?.address);
   const locality = address?.addressLocality;
   const offers = object(listing?.offers) ?? object(Array.isArray(listing?.offers) ? listing.offers[0] : null);
@@ -84,5 +102,6 @@ export function extractListing(html: string): ExtractedListing {
     bills,
     roomType,
     contractWeeks,
+    images: [...new Set(images)].slice(0, 8),
   };
 }

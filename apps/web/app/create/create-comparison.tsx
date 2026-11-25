@@ -13,6 +13,7 @@ type OptionInput = {
   contractWeeks: string;
   listingUrl: string;
   sourceUrl: string;
+  images: string[];
 };
 
 const emptyOption: OptionInput = {
@@ -24,6 +25,7 @@ const emptyOption: OptionInput = {
   contractWeeks: "",
   listingUrl: "",
   sourceUrl: "",
+  images: [],
 };
 
 function inputFromOption(option: LocalOption): OptionInput {
@@ -36,6 +38,7 @@ function inputFromOption(option: LocalOption): OptionInput {
     contractWeeks: option.contractWeeks == null ? "" : String(option.contractWeeks),
     listingUrl: option.sourceUrl ?? "",
     sourceUrl: option.sourceUrl ?? "",
+    images: option.images ?? [],
   };
 }
 
@@ -48,6 +51,8 @@ export function CreateComparison({ initial }: { initial?: LocalComparison }) {
   const [error, setError] = useState("");
   const [extracting, setExtracting] = useState<0 | 1 | null>(null);
   const [extractMessages, setExtractMessages] = useState<[string, string]>(["", ""]);
+  const [photoLinks, setPhotoLinks] = useState<[string, string]>(["", ""]);
+  const [photoMessages, setPhotoMessages] = useState<[string, string]>(["", ""]);
   const listingUrls = useRef<[string, string]>([
     initial?.options[0].sourceUrl ?? "",
     initial?.options[1].sourceUrl ?? "",
@@ -58,7 +63,10 @@ export function CreateComparison({ initial }: { initial?: LocalComparison }) {
     setOptions((current) => {
       const next: [OptionInput, OptionInput] = [{ ...current[0] }, { ...current[1] }];
       next[index] = { ...next[index], [field]: value };
-      if (field === "listingUrl") next[index].sourceUrl = "";
+      if (field === "listingUrl") {
+        next[index].sourceUrl = "";
+        next[index].images = [];
+      }
       return next;
     });
     if (field === "listingUrl") {
@@ -68,6 +76,40 @@ export function CreateComparison({ initial }: { initial?: LocalComparison }) {
         return next;
       });
     }
+  }
+
+  function addPhoto(index: 0 | 1) {
+    const input = photoLinks[index].trim();
+    let message = "";
+    try {
+      const url = new URL(input);
+      if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || input.length > 2_000) {
+        throw new Error("Use a public http or https photo link.");
+      }
+      if (options[index].images.includes(url.href)) message = "This photo is already included.";
+      else if (options[index].images.length >= 8) message = "Each place can have up to eight photos.";
+      else {
+        setOptions((current) => {
+          const next: [OptionInput, OptionInput] = [{ ...current[0] }, { ...current[1] }];
+          next[index].images = [...next[index].images, url.href];
+          return next;
+        });
+        setPhotoLinks((current) => {
+          const next: [string, string] = [...current];
+          next[index] = "";
+          return next;
+        });
+        message = "Photo added. Check that the preview shows the right place.";
+      }
+    } catch (cause) {
+      message = cause instanceof Error && cause.message.startsWith("Use a public")
+        ? cause.message : "Enter a valid photo link starting with https:// or http://.";
+    }
+    setPhotoMessages((current) => {
+      const next: [string, string] = [...current];
+      next[index] = message;
+      return next;
+    });
   }
 
   async function extractFromLink(index: 0 | 1) {
@@ -88,24 +130,28 @@ export function CreateComparison({ initial }: { initial?: LocalComparison }) {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "The listing could not be previewed.");
       if (listingUrls.current[index].trim() !== url) return;
+      const foundFields = Object.values(result.fields ?? {}).filter((value) => value !== undefined && value !== null && value !== "").length;
       setOptions((current) => {
         if (current[index].listingUrl.trim() !== url) return current;
         const next: [OptionInput, OptionInput] = [{ ...current[0] }, { ...current[1] }];
         next[index] = {
           ...next[index],
-          name: result.fields.name ?? next[index].name,
-          area: result.fields.area ?? next[index].area,
-          weeklyRent: result.fields.weeklyRent === undefined ? next[index].weeklyRent : String(result.fields.weeklyRent),
-          bills: result.fields.bills ?? next[index].bills,
-          roomType: result.fields.roomType ?? next[index].roomType,
-          contractWeeks: result.fields.contractWeeks === undefined ? next[index].contractWeeks : String(result.fields.contractWeeks),
+          name: next[index].name.trim() || result.fields.name || "",
+          area: next[index].area.trim() || result.fields.area || "",
+          weeklyRent: next[index].weeklyRent || (result.fields.weeklyRent === undefined ? "" : String(result.fields.weeklyRent)),
+          bills: next[index].bills === "unknown" ? result.fields.bills ?? "unknown" : next[index].bills,
+          roomType: next[index].roomType.trim() || result.fields.roomType || "",
+          contractWeeks: next[index].contractWeeks || (result.fields.contractWeeks === undefined ? "" : String(result.fields.contractWeeks)),
           sourceUrl: result.sourceUrl,
+          images: [...new Set([...next[index].images, ...(Array.isArray(result.fields.images) ? result.fields.images : [])])].slice(0, 8),
         };
         return next;
       });
       setExtractMessages((current) => {
         const next: [string, string] = [...current];
-        next[index] = "Details found. Check every field before saving.";
+        next[index] = foundFields
+          ? `${foundFields} detail${foundFields === 1 ? "" : "s"} found. Empty fields were filled and your existing entries were kept. Check every field before saving.`
+          : "No usable details were found on this page. Enter them manually before saving.";
         return next;
       });
     } catch (cause) {
@@ -130,6 +176,7 @@ export function CreateComparison({ initial }: { initial?: LocalComparison }) {
       roomType: input.roomType.trim(),
       contractWeeks: input.contractWeeks === "" ? null : Number(input.contractWeeks),
       sourceUrl: input.sourceUrl || undefined,
+      images: input.images,
     });
 
     const comparison = {
@@ -137,6 +184,7 @@ export function CreateComparison({ initial }: { initial?: LocalComparison }) {
       title: title.trim() || `${options[0].name.trim()} or ${options[1].name.trim()}?`.slice(0, 160),
       createdAt: initial?.createdAt ?? new Date().toISOString(),
       options: [toOption(options[0]), toOption(options[1])] as [LocalOption, LocalOption],
+      decision: initial?.decision,
     };
     try {
       saveLocalComparison(comparison);
@@ -166,6 +214,27 @@ export function CreateComparison({ initial }: { initial?: LocalComparison }) {
                   {extracting === index ? "Reading listing…" : "Extract details"}
                 </button>
                 {extractMessages[index] && <p role="status">{extractMessages[index]}</p>}
+                <div className="photo-link-entry">
+                  <label>Add a photo link<input type="url" value={photoLinks[index]} onChange={(event) => setPhotoLinks((current) => {
+                    const next: [string, string] = [...current];
+                    next[index] = event.target.value;
+                    return next;
+                  })} placeholder="https://example.com/room.jpg" /></label>
+                  <button type="button" onClick={() => addPhoto(index as 0 | 1)} disabled={!photoLinks[index].trim() || option.images.length >= 8}>Add photo</button>
+                  {photoMessages[index] && <p role="status">{photoMessages[index]}</p>}
+                </div>
+                {option.images.length > 0 && <div className="extracted-images" aria-label={`Option ${index === 0 ? "A" : "B"} listing photos`}>
+                  {option.images.map((image) => <div className="extracted-image" key={image}>
+                    {/* Listing images come from the external website and may not be available later. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={image} alt="Listing preview" loading="lazy" referrerPolicy="no-referrer" />
+                    <button type="button" aria-label="Remove photo" onClick={() => setOptions((current) => {
+                      const next: [OptionInput, OptionInput] = [{ ...current[0] }, { ...current[1] }];
+                      next[index].images = next[index].images.filter((item) => item !== image);
+                      return next;
+                    })}>Remove</button>
+                  </div>)}
+                </div>}
               </div>
               <label>Place name<input value={option.name} onChange={(event) => updateOption(index as 0 | 1, "name", event.target.value)} maxLength={100} required placeholder="Accommodation name" /></label>
               <label>Area<input value={option.area} onChange={(event) => updateOption(index as 0 | 1, "area", event.target.value)} maxLength={100} placeholder="e.g. Fallowfield" /></label>
