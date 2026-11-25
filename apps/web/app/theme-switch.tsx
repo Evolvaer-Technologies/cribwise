@@ -10,7 +10,10 @@ export function ThemeSwitch() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("evolvaer-theme");
-      if (saved === "light" || saved === "dark") setTheme(saved);
+      if (saved === "light" || saved === "dark") {
+        document.documentElement.setAttribute("data-theme", saved);
+        setTheme(saved);
+      }
     } catch {
       // System appearance remains available when storage is blocked.
     }

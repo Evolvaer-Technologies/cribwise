@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en-GB" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem("evolvaer-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}` }} />
-      </head>
+    <html lang="en-GB">
       <body>
         <a className="skip" href="#main">Skip to content</a>
         <header className="shell masthead">
@@ -23,6 +20,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <nav aria-label="Main navigation">
             <Link href="/how-it-works">How it works</Link>
             <Link href="/register">My areas</Link>
+            <Link href="/saved">Saved</Link>
           </nav>
           <ThemeSwitch />
         </header>

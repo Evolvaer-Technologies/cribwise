@@ -95,7 +95,7 @@ export default async function ComparisonPage({ params }: { params: Promise<{ pub
         <p className="eyebrow">Sample comparison</p>
         <h1>{comparison.title}</h1>
         <p>These fictional listings show how rent, bills and room details appear side by side.</p>
-        <ShareComparison title={comparison.title} />
+        <ShareComparison title={comparison.title} publicId={comparison.publicId} />
         <div className="comparison-summary" aria-label="Comparison overview">
           <div><span>Comparing</span><strong>2 places</strong></div>
           <div><span>Weekly rent gap</span><strong>{comparison.options.every((option) => option.rent?.period === "week") ? new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(Math.abs(comparison.options[0].rent!.amount - comparison.options[1].rent!.amount)) : "Not provided"}</strong></div>

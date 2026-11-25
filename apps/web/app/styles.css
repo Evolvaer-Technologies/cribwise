@@ -26,7 +26,14 @@ nav a, .actions a:not(.button) { text-decoration: underline; }
 .browse-heading h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; letter-spacing: -.035em; }
 .browse-heading > p { font-size: .9rem; }
 .browse-heading h3 { font-size: 1.2rem; font-weight: 750; }
+.carousel-count { display: block; color: var(--secondary); font-size: .8rem; margin-top: .15rem; }
+.carousel-controls { display: flex; gap: .5rem; }
+.carousel-controls button { width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--brand); font-size: 1.2rem; cursor: pointer; }
+.carousel-controls button:hover { border-color: var(--brand); background: var(--subtle); }
 .browse-heading > span, .browse-intro { color: var(--secondary); font-size: .85rem; }
+.comparison-search { display: grid; gap: .4rem; max-width: 26rem; margin-top: 1.25rem; font-size: .85rem; font-weight: 650; }
+.comparison-search input { min-height: 44px; padding: .6rem .8rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-weight: 400; }
+.comparison-search input::placeholder { color: var(--secondary); }
 .carousel-group { margin-top: 2rem; }
 .empty-area { margin-top: 1.5rem; padding: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
 .empty-area h3 { font-weight: 750; }
@@ -54,6 +61,11 @@ p { max-width: 62ch; color: var(--secondary); margin-block: .75rem; }
 .share-actions button { min-height: 44px; padding: .5rem .85rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--brand); font-weight: 650; cursor: pointer; }
 .share-actions button:hover { border-color: var(--brand); }
 .share-actions span { color: var(--secondary); font-size: .85rem; }
+.share-actions button[aria-pressed="true"] { background: var(--subtle); border-color: var(--brand); }
+.saved-list { display: grid; gap: .8rem; margin-top: 1.5rem; max-width: 40rem; }
+.saved-list li { display: grid; gap: .2rem; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.saved-list a { font-weight: 700; }
+.saved-list span { color: var(--secondary); font-size: .875rem; }
 .comparison-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin-top: 2rem; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--border); }
 .comparison-summary div { display: grid; gap: .25rem; padding: 1rem; background: var(--surface); }
 .comparison-summary span { color: var(--secondary); font-size: .8rem; }
@@ -76,11 +88,20 @@ p { max-width: 62ch; color: var(--secondary); margin-block: .75rem; }
 .option[data-side="B"] .eyebrow { color: var(--option-b); }
 .option-media { display: grid; place-items: center; aspect-ratio: 2 / 1; margin-bottom: 1rem; border-radius: 11px; background: linear-gradient(145deg, var(--subtle), var(--canvas)); color: var(--secondary); overflow: hidden; }
 .gallery .option-media { position: relative; margin-bottom: .5rem; }
+.gallery-open { width: 100%; height: 100%; cursor: zoom-in; }
+.gallery-open img { width: 100%; height: 100%; object-fit: cover; }
 .gallery figcaption { position: absolute; bottom: .5rem; left: .5rem; padding: .2rem .5rem; border-radius: .35rem; background: rgba(16,42,67,.85); color: white; font-size: .75rem; }
 .gallery-thumbnails { display: flex; gap: .5rem; margin-bottom: 1.25rem; }
 .gallery-thumbnails button { width: 4rem; height: 3rem; overflow: hidden; border: 2px solid transparent; border-radius: .4rem; }
 .gallery-thumbnails button[aria-pressed="true"] { border-color: var(--brand); }
 .gallery-thumbnails img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-dialog { width: min(92vw, 64rem); max-height: 92vh; margin: auto; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); }
+.gallery-dialog::backdrop { background: rgba(6, 25, 35, .82); }
+.gallery-dialog-header, .gallery-dialog-controls { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.gallery-dialog-header { margin-bottom: .75rem; font-size: .875rem; }
+.gallery-dialog > img { display: block; max-width: 100%; max-height: 70vh; margin: auto; object-fit: contain; }
+.gallery-dialog-controls { margin-top: .75rem; }
+.gallery-dialog button { min-height: 44px; padding: .4rem .8rem; border: 1px solid var(--border); border-radius: 8px; color: var(--brand); }
 .media-placeholder { display: grid; justify-items: center; gap: .2rem; text-align: center; padding: 1rem; }
 .media-placeholder > span { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 1rem; background: var(--surface); color: var(--brand); font-size: 2rem; line-height: 1; }
 .media-placeholder strong { color: var(--text); font-size: .9rem; }

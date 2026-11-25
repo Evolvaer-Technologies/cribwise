@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { SaveComparison } from "./save-comparison";
 
-export function ShareComparison({ title }: { title: string }) {
+export function ShareComparison({ title, publicId }: { title: string; publicId: string }) {
   const [message, setMessage] = useState("");
 
   async function copyLink() {
@@ -15,6 +16,10 @@ export function ShareComparison({ title }: { title: string }) {
   }
 
   async function share() {
+    if (typeof navigator.share !== "function") {
+      await copyLink();
+      return;
+    }
     try {
       await navigator.share({ title: `${title} | Cribwise`, url: window.location.href });
       setMessage("");
@@ -26,10 +31,9 @@ export function ShareComparison({ title }: { title: string }) {
 
   return (
     <div className="share-actions">
+      <SaveComparison publicId={publicId} />
       <button type="button" onClick={copyLink}>Copy link</button>
-      {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
-        <button type="button" onClick={share}>Share</button>
-      )}
+      <button type="button" onClick={share}>Share</button>
       <span role="status" aria-live="polite">{message}</span>
     </div>
   );
