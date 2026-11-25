@@ -144,6 +144,9 @@ p { max-width: 62ch; color: var(--secondary); margin-block: .75rem; }
 .summary-panel h2 { margin: .2rem 0 .7rem; }
 .summary-panel p { margin: .45rem 0; color: var(--text); }
 .summary-panel small { display: block; margin-top: .8rem; color: var(--secondary); }
+.fact-list { display: grid; gap: .4rem; list-style: disc; padding-left: 1.25rem; }
+.missing-facts { margin-top: 1rem; }
+.missing-facts ul { list-style: disc; padding-left: 1.25rem; }
 .vote-panel { margin-top: 1.5rem; padding: clamp(1rem, 3vw, 1.75rem); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
 .vote-panel h2 { margin: .25rem 0 1rem; }
 .vote-panel legend { font-weight: 650; }
@@ -187,6 +190,10 @@ dd { font-weight: 650; overflow-wrap: anywhere; }
 .create-options { display: grid; gap: 1rem; }
 .create-option { display: grid; gap: .8rem; padding: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
 .create-option legend { padding: 0 .4rem; color: var(--brand); font-weight: 750; }
+.listing-extract { display: grid; gap: .5rem; padding: 1rem; border-radius: 8px; background: var(--subtle); }
+.listing-extract button { justify-self: start; min-height: 44px; padding: .5rem .8rem; border: 1px solid var(--brand); border-radius: 8px; color: var(--brand); font-weight: 650; }
+.listing-extract button:disabled { opacity: .5; cursor: not-allowed; }
+.listing-extract p { margin: 0; font-size: .8rem; }
 .preferences fieldset { margin-top: 2rem; }
 .preferences legend { font-weight: 750; }
 .preferences legend span { color: var(--secondary); font-size: .85rem; font-weight: 400; margin-left: .5rem; }

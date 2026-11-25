@@ -11,7 +11,9 @@ npm run dev
 
 Open [the local sample comparison](http://localhost:3000/c/demo). The home page and walkthrough are at `/` and `/how-it-works`. The appearance control offers System, Light and Dark.
 
-Use `/create` to enter two places and `/my-comparisons` to reopen drafts. Drafts stay in the current browser and are not published through the public comparison route or API.
+Use `/create` to enter two places and `/my-comparisons` to reopen drafts. On the creation form, paste a public listing URL and choose **Extract details** to fill details that the page exposes, such as its name, area, weekly rent, bills, room type, and contract length. Check and edit the extracted facts before saving. Starting prices and ambiguous rent figures remain blank. Drafts stay in the current browser and are not published through the public comparison route or API.
+
+Open a draft and choose **Edit comparison** to correct its details or retry extraction from a listing link. Saving updates that draft in place.
 
 `npm run typecheck` validates TypeScript and `npm run build` builds the production application. The workspace shares public comparison types and design tokens between packages.
 
